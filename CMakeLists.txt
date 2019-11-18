@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(sighandlers)
 
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 file(GLOB SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(${PROJECT_NAME} SHARED ${SRCS})
