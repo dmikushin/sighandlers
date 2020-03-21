@@ -184,3 +184,7 @@ void SigSegvHandler::disable()
 	SigSegvHandler::getInstance().disable_();
 }
 
+void sigsegv_handler_enable()
+{
+	SigSegvHandler::enable();
+}

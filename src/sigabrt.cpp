@@ -185,3 +185,7 @@ void SigAbrtHandler::disable()
 	SigAbrtHandler::getInstance().disable_();
 }
 
+void sigabrt_handler_enable()
+{
+	SigAbrtHandler::enable();
+}

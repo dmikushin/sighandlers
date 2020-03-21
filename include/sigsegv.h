@@ -66,5 +66,7 @@ private :
 	void disable_();
 };
 
+extern "C" void sigsegv_handler_enable();
+
 #endif // HDDM_SIGSEGV_H
 

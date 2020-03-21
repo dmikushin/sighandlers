@@ -66,5 +66,7 @@ private :
 	void disable_();
 };
 
+extern "C" void sigabrt_handler_enable();
+
 #endif // HDDM_SIGABRT_H
 
