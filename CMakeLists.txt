@@ -15,6 +15,10 @@ if(NOT WIN32)
 set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 endif()
 
+if (APPLE)
+set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_NAME_DIR "@rpath")
+endif()
+
 add_executable(${PROJECT_NAME}_sah_test "${CMAKE_CURRENT_SOURCE_DIR}/src/test/sah.cpp")
 target_include_directories(${PROJECT_NAME}_sah_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME}_sah_test ${PROJECT_NAME})
