@@ -8,6 +8,15 @@
 #endif
 #include <limits.h>
 
+#ifdef _WIN32
+#include "windows.h"
+#include "excpt.h"
+
+#ifndef HOST_NAME_MAX
+#define HOST_NAME_MAX 64
+#endif
+#endif
+
 #define SIGABRT_HANDLER_TEXT "Process is waiting to attach the debugger on host "
 
 // Catch abort signals in the code scope.
@@ -37,9 +46,13 @@ private :
 	const char text[sizeof(SIGABRT_HANDLER_TEXT)];
 	char message[HOST_NAME_MAX + sizeof(SIGABRT_HANDLER_TEXT)];
 
+#ifdef _WIN32
+	static EXCEPTION_DISPOSITION handler(_EXCEPTION_RECORD* record, void* establisher_frame, _CONTEXT* context, void* dispatcher_context);
+#else
 	struct sigaction saOld;
 
 	static void handler(int sig, siginfo_t *dont_care, void *dont_care_either);
+#endif
 
 	void enable_();
 	void disable_();
