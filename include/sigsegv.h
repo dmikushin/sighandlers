@@ -17,6 +17,14 @@
 #endif
 #endif
 
+#ifndef HOST_NAME_MAX
+# if defined(_POSIX_HOST_NAME_MAX)
+#  define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
+# elif defined(MAXHOSTNAMELEN)
+#  define HOST_NAME_MAX MAXHOSTNAMELEN
+# endif
+#endif /* HOST_NAME_MAX */
+
 #define SIGSEGV_HANDLER_TEXT "Process is waiting to attach the debugger on host "
 
 // Catch segmentation fault signals in the code scope.
