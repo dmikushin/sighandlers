@@ -23,16 +23,16 @@ EXCEPTION_DISPOSITION SigSegvHandler::handler(_EXCEPTION_RECORD* record, void* e
 	if (getenv("FREEZE_ON_ERROR"))
 	{
 		// Only basic write() is allowed within a signal handler (signal-safety).
-		write(STDERR_FILENO, "Segmentation fault\n", sizeof("Segmentation fault\n"));
+		_write(STDERR_FILENO, "Segmentation fault\n", sizeof("Segmentation fault\n"));
 
 		// Freeze aborted process to allow e.g. attaching debugger.
-		write(STDERR_FILENO, SigSegvHandler.message, strlen(SigSegvHandler.message));
+		_write(STDERR_FILENO, SigSegvHandler.message, strlen(SigSegvHandler.message));
 		while (1) Sleep(1000); /* 1 sec */
 	}
 	else
 	{
 		// Display banner that one can re-run with FREEZE_ON_ERROR to debug.
-		write(STDERR_FILENO, "You may want to set FREEZE_ON_ERROR environment variable to debug the case\n",
+		_write(STDERR_FILENO, "You may want to set FREEZE_ON_ERROR environment variable to debug the case\n",
 			sizeof("You may want to set FREEZE_ON_ERROR environment variable to debug the case\n")); 
 
 #ifdef __MINGW32__
