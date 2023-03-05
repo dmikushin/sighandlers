@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.12)
 
 project(sighandlers)
 
@@ -9,7 +9,11 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)
 
 file(GLOB SRCS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
+if(BUILD_SHARED_LIBS)
 add_library(${PROJECT_NAME} SHARED ${SRCS})
+else()
+add_library(${PROJECT_NAME} STATIC ${SRCS})
+endif()
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 if(WIN32)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
