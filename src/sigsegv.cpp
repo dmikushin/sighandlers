@@ -1,5 +1,6 @@
 #include "sigsegv.h"
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -58,7 +59,7 @@ EXCEPTION_DISPOSITION SigSegvHandler::handler(_EXCEPTION_RECORD* record, void* e
 	return ExceptionContinueExecution;
 }
 #else
-void SigSegvHandler::handler(int sig, siginfo_t *dont_care, void *dont_care_either)
+void SigSegvHandler::handler(int sig)
 {
 	SigSegvHandler& SigSegvHandler = SigSegvHandler::getInstance();
 
@@ -66,17 +67,19 @@ void SigSegvHandler::handler(int sig, siginfo_t *dont_care, void *dont_care_eith
 	if (getenv("FREEZE_ON_ERROR"))
 	{
 		// Only basic write() is allowed within a signal handler (signal-safety).
-		write(STDERR_FILENO, "Segmentation fault\n", sizeof("Segmentation fault\n"));
+		fputs("Segmentation fault\n", stderr);
 
 		// Freeze aborted process to allow e.g. attaching debugger.
-		write(STDERR_FILENO, SigSegvHandler.message, strlen(SigSegvHandler.message));
+		fputs(SigSegvHandler.message, stderr);
+
+        fflush(stderr);
+
 		while (1) usleep(1000000); /* 1 sec */
 	}
 	else
 	{
 		// Display banner that one can re-run with FREEZE_ON_ERROR to debug.
-		write(STDERR_FILENO, "You may want to set FREEZE_ON_ERROR environment variable to debug the case\n",
-			sizeof("You may want to set FREEZE_ON_ERROR environment variable to debug the case\n")); 
+		fputs("You may want to set FREEZE_ON_ERROR environment variable to debug the case\n", stderr);
 
 		sigaction(SIGSEGV, &SigSegvHandler.saOld, NULL);
 		raise(sig);
@@ -115,9 +118,11 @@ void SigSegvHandler::enable_()
 	sigemptyset(&sa.sa_mask);
 
 	sa.sa_flags = SA_NODEFER;
-	sa.sa_sigaction = handler;
+	sa.sa_handler = handler;
 
-	sigaction(SIGSEGV, &sa, &saOld);
+    if (sigaction(SIGSEGV, &sa, &saOld) != 0) {
+        fprintf(stderr, "Could not install SIGSEGV handler: %s\n", strerror(errno));
+    }
 #endif
 
 	enabled = true;

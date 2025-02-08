@@ -1,5 +1,5 @@
-#ifndef HDDM_SIGSEGV_H
-#define HDDM_SIGSEGV_H
+#ifndef SIGSEGV_H
+#define SIGSEGV_H
 
 #include <signal.h>
 #include <sys/types.h>
@@ -26,6 +26,8 @@
 #endif /* HOST_NAME_MAX */
 
 #define SIGSEGV_HANDLER_TEXT "Process is waiting to attach the debugger on host "
+
+#ifdef __cplusplus
 
 // Catch segmentation fault signals in the code scope.
 class SigSegvHandler
@@ -59,14 +61,16 @@ private :
 #else
 	struct sigaction saOld;
 
-	static void handler(int sig, siginfo_t *dont_care, void *dont_care_either);
+	static void handler(int sig);
 #endif
 
 	void enable_();
 	void disable_();
 };
 
-extern "C" void sigsegv_handler_enable();
+extern "C"
+#endif // __cplusplus
+void sigsegv_handler_enable();
 
-#endif // HDDM_SIGSEGV_H
+#endif // SIGSEGV_H
 

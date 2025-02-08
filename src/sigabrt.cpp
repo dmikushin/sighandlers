@@ -1,5 +1,6 @@
 #include "sigabrt.h"
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -59,7 +60,7 @@ EXCEPTION_DISPOSITION SigAbrtHandler::handler(_EXCEPTION_RECORD* record, void* e
 	return ExceptionContinueExecution;
 }
 #else
-void SigAbrtHandler::handler(int sig, siginfo_t *dont_care, void *dont_care_either)
+void SigAbrtHandler::handler(int sig)
 {
 	SigAbrtHandler& sigAbrtHandler = SigAbrtHandler::getInstance();
 
@@ -67,17 +68,21 @@ void SigAbrtHandler::handler(int sig, siginfo_t *dont_care, void *dont_care_eith
 	if (getenv("FREEZE_ON_ERROR"))
 	{
 		// Only basic write() is allowed within a signal handler (signal-safety).
-		write(STDERR_FILENO, "Aborted\n", sizeof("Aborted\n"));
+		fputs("Aborted\n", stderr);
 
 		// Freeze aborted process to allow e.g. attaching debugger.
-		write(STDERR_FILENO, sigAbrtHandler.message, strlen(sigAbrtHandler.message));
+		fputs(sigAbrtHandler.message, stderr);
+
+        fflush(stderr);
+
 		while (1) usleep(1000000); /* 1 sec */
 	}
 	else
 	{
 		// Display banner that one can re-run with FREEZE_ON_ERROR to debug.
-		write(STDERR_FILENO, "You may want to set FREEZE_ON_ERROR environment variable to debug the case\n",
-			sizeof("You may want to set FREEZE_ON_ERROR environment variable to debug the case\n")); 
+		fputs("You may want to set FREEZE_ON_ERROR environment variable to debug the case\n", stderr);
+
+        fflush(stderr);
 
 		sigaction(SIGABRT, &sigAbrtHandler.saOld, NULL);
 		raise(sig);
@@ -116,9 +121,11 @@ void SigAbrtHandler::enable_()
 	sigemptyset(&sa.sa_mask);
 
 	sa.sa_flags = SA_NODEFER;
-	sa.sa_sigaction = handler;
+	sa.sa_handler = handler;
 
-	sigaction(SIGABRT, &sa, &saOld);
+    if (sigaction(SIGABRT, &sa, &saOld) != 0) {
+        fprintf(stderr, "Could not install SIGABRT handler: %s\n", strerror(errno));
+    }
 #endif
 
 	enabled = true;
